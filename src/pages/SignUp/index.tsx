@@ -3,8 +3,10 @@ import { FiMail, FiLock, FiArrowLeft, FiUser } from 'react-icons/fi';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
 import { FormHandles } from '@unform/core';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import getValidationErrors from '../../utils/getValidationErrors';
+import api from '../../services/api';
+import { useToast } from '../../hooks/toast';
 
 import * as SC from './styles';
 import logoImg from '../../assets/logo.svg';
@@ -12,11 +14,21 @@ import logoImg from '../../assets/logo.svg';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
+interface SignUpFormData {
+  name: string;
+  email: string;
+  password: string;
+}
+
 const SignUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
+  const { addToast } = useToast();
+  const history = useHistory();
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  const handleSubmit = useCallback(async (data: object): Promise<void> => {
+  const handleSubmit = useCallback(async (data: SignUpFormData): Promise<
+    void
+  > => {
     formRef.current?.setErrors({});
     try {
       const schema = Yup.object().shape({
@@ -29,9 +41,31 @@ const SignUp: React.FC = () => {
       await schema.validate(data, {
         abortEarly: false,
       });
+
+      await api.post('users', {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
+
+      history.push('/');
+
+      addToast({
+        title: 'Well done',
+        description: 'You are registered on GoBarber and ready to logon.',
+        type: 'success',
+      });
     } catch (err) {
-      const errors = getValidationErrors(err);
-      formRef.current?.setErrors(errors);
+      if (err instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(err);
+        formRef.current?.setErrors(errors);
+      }
+
+      addToast({
+        type: 'error',
+        title: 'Oh-oh.. there is something wrong',
+        description: 'Please, verify your data and try again.',
+      });
     }
   }, []);
 
