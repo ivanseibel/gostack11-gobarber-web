@@ -3,6 +3,7 @@ import { FiMail, FiLock, FiArrowLeft, FiUser } from 'react-icons/fi';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
 import { FormHandles } from '@unform/core';
+import { Link } from 'react-router-dom';
 import getValidationErrors from '../../utils/getValidationErrors';
 
 import * as SC from './styles';
@@ -39,28 +40,30 @@ const SignUp: React.FC = () => {
       <SC.Background />
 
       <SC.Content>
-        <img src={logoImg} alt="GoBarber" />
+        <SC.AnimationContainer>
+          <img src={logoImg} alt="GoBarber" />
 
-        <Form ref={formRef} onSubmit={handleSubmit}>
-          <h1>Create your account</h1>
+          <Form ref={formRef} onSubmit={handleSubmit}>
+            <h1>Create your account</h1>
 
-          <Input name="name" icon={FiUser} placeholder="Name" />
-          <Input name="email" icon={FiMail} placeholder="E-mail" />
+            <Input name="name" icon={FiUser} placeholder="Name" />
+            <Input name="email" icon={FiMail} placeholder="E-mail" />
 
-          <Input
-            name="password"
-            icon={FiLock}
-            type="password"
-            placeholder="Password"
-          />
+            <Input
+              name="password"
+              icon={FiLock}
+              type="password"
+              placeholder="Password"
+            />
 
-          <Button type="submit">Create</Button>
-        </Form>
+            <Button type="submit">Create</Button>
+          </Form>
 
-        <a href="login">
-          <FiArrowLeft />
-          Go back to login
-        </a>
+          <Link to="/">
+            <FiArrowLeft />
+            Go back to login
+          </Link>
+        </SC.AnimationContainer>
       </SC.Content>
     </SC.Container>
   );
