@@ -95,7 +95,7 @@ const SignUp: React.FC = () => {
 
           <Link to="/">
             <FiArrowLeft />
-            Go back to login
+            Go back to logon
           </Link>
         </SC.AnimationContainer>
       </SC.Content>
