@@ -26,48 +26,49 @@ const SignUp: React.FC = () => {
   const history = useHistory();
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  const handleSubmit = useCallback(async (data: SignUpFormData): Promise<
-    void
-  > => {
-    formRef.current?.setErrors({});
-    try {
-      const schema = Yup.object().shape({
-        name: Yup.string().required('Name is required'),
-        email: Yup.string()
-          .required('Email is required')
-          .email('Must be a valid email'),
-        password: Yup.string().min(6, 'Min 6 characters'),
-      });
-      await schema.validate(data, {
-        abortEarly: false,
-      });
+  const handleSubmit = useCallback(
+    async (data: SignUpFormData): Promise<void> => {
+      formRef.current?.setErrors({});
+      try {
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Name is required'),
+          email: Yup.string()
+            .required('Email is required')
+            .email('Must be a valid email'),
+          password: Yup.string().min(6, 'Min 6 characters'),
+        });
+        await schema.validate(data, {
+          abortEarly: false,
+        });
 
-      await api.post('users', {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-      });
+        await api.post('users', {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        });
 
-      history.push('/');
+        history.push('/');
 
-      addToast({
-        title: 'Well done',
-        description: 'You are registered on GoBarber and ready to logon.',
-        type: 'success',
-      });
-    } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        const errors = getValidationErrors(err);
-        formRef.current?.setErrors(errors);
+        addToast({
+          title: 'Well done',
+          description: 'You are registered on GoBarber and ready to logon.',
+          type: 'success',
+        });
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          formRef.current?.setErrors(errors);
+        }
+
+        addToast({
+          type: 'error',
+          title: 'Oh-oh.. there is something wrong',
+          description: 'Please, verify your data and try again.',
+        });
       }
-
-      addToast({
-        type: 'error',
-        title: 'Oh-oh.. there is something wrong',
-        description: 'Please, verify your data and try again.',
-      });
-    }
-  }, []);
+    },
+    [addToast, history],
+  );
 
   return (
     <SC.Container>
