@@ -3,7 +3,7 @@ import { FiLock } from 'react-icons/fi';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import getValidationErrors from '../../utils/getValidationErrors';
 
@@ -13,6 +13,7 @@ import logoImg from '../../assets/logo.svg';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { useToast } from '../../hooks/toast';
+import api from '../../services/api';
 
 interface ResetPasswordFormData {
   password: string;
@@ -23,6 +24,7 @@ const ResetPassword: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const { addToast } = useToast();
   const history = useHistory();
+  const location = useLocation();
 
   const handleSubmit = useCallback(
     async (data: ResetPasswordFormData): Promise<void> => {
@@ -39,7 +41,15 @@ const ResetPassword: React.FC = () => {
           abortEarly: false,
         });
 
-        // TODO: Implement password reset
+        const { password, password_confirmation } = data;
+
+        const token = location.search.replace('?token=', '');
+
+        await api.post('/password/reset', {
+          password,
+          password_confirmation,
+          token,
+        });
 
         history.push('/');
       } catch (err) {
