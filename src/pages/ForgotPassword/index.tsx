@@ -77,7 +77,7 @@ const ForgotPassword: React.FC = () => {
           <img src={logoImg} alt="GoBarber" />
 
           <Form ref={formRef} onSubmit={handleSubmit}>
-            <h1>Recover your password</h1>
+            <h1>Request a password recovery</h1>
 
             <Input name="email" icon={FiMail} placeholder="E-mail" />
 
