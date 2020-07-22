@@ -65,7 +65,7 @@ const ResetPassword: React.FC = () => {
         });
       }
     },
-    [addToast, history],
+    [addToast, history, location.search],
   );
 
   return (
@@ -82,6 +82,7 @@ const ResetPassword: React.FC = () => {
               icon={FiLock}
               type="password"
               placeholder="New password"
+              autoFocus
             />
 
             <Input
