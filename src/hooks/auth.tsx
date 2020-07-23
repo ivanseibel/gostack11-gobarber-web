@@ -52,6 +52,9 @@ const AuthProvider: React.FC = ({ children }) => {
 
     const { token, user } = response.data;
 
+    user.avatar_url =
+      user.avatar_url || `https://api.adorable.io/avatars/100/${user.name}.png`;
+
     localStorage.setItem('@GoBarber:token', token);
     localStorage.setItem('@GoBarber:user', JSON.stringify(user));
 
