@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { isToday, format } from 'date-fns';
+import { isToday, format, parseISO } from 'date-fns';
 import DayPicker, { DayModifiers } from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 
@@ -16,7 +16,8 @@ interface MonthAvailabilityItem {
 
 interface Appointment {
   id: string;
-  date: Date;
+  date: string;
+  hour: string;
   user: {
     name: string;
     avatar_url: string;
@@ -58,7 +59,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     api
-      .get(`/appointments/me`, {
+      .get<Appointment[]>(`/appointments/me`, {
         params: {
           year: selectedDate.getFullYear(),
           month: selectedDate.getMonth() + 1,
@@ -66,7 +67,11 @@ const Dashboard: React.FC = () => {
         },
       })
       .then(response => {
-        setAppointments(response.data);
+        setAppointments(
+          response.data.map(item => {
+            return { ...item, hour: format(parseISO(item.date), 'hh:mm') };
+          }),
+        );
       });
   }, [selectedDate]);
 
@@ -84,6 +89,18 @@ const Dashboard: React.FC = () => {
 
     return dates;
   }, [monthAvailability, currentMonth]);
+
+  const morningAppointments = useMemo(() => {
+    return appointments.filter(appointment => {
+      return parseISO(appointment.date).getHours() < 12;
+    });
+  }, [appointments]);
+
+  const afternoonAppointments = useMemo(() => {
+    return appointments.filter(appointment => {
+      return parseISO(appointment.date).getHours() >= 12;
+    });
+  }, [appointments]);
 
   return (
     <SC.Container>
@@ -130,57 +147,45 @@ const Dashboard: React.FC = () => {
           <SC.Section>
             <strong>Morning</strong>
 
-            <SC.Appointment>
-              <span>
-                <FiClock />
-                08:00
-              </span>
+            {morningAppointments.map(appointment => (
+              <SC.Appointment key={appointment.id}>
+                <span>
+                  <FiClock />
+                  {appointment.hour}
+                </span>
 
-              <div>
-                <img
-                  src="https://avatars0.githubusercontent.com/u/42596775?s=460&u=8ddc06cf5793a75d7e7ad462ddfed52b8ef4d503&v=4"
-                  alt="Ivan Seibel"
-                />
+                <div>
+                  <img
+                    src={appointment.user.avatar_url}
+                    alt={appointment.user.name}
+                  />
 
-                <strong>Ivan Seibel</strong>
-              </div>
-            </SC.Appointment>
-
-            <SC.Appointment>
-              <span>
-                <FiClock />
-                08:00
-              </span>
-
-              <div>
-                <img
-                  src="https://avatars0.githubusercontent.com/u/42596775?s=460&u=8ddc06cf5793a75d7e7ad462ddfed52b8ef4d503&v=4"
-                  alt="Ivan Seibel"
-                />
-
-                <strong>Ivan Seibel</strong>
-              </div>
-            </SC.Appointment>
+                  <strong>{appointment.user.name}</strong>
+                </div>
+              </SC.Appointment>
+            ))}
           </SC.Section>
 
           <SC.Section>
             <strong>Afternoon</strong>
 
-            <SC.Appointment>
-              <span>
-                <FiClock />
-                08:00
-              </span>
+            {afternoonAppointments.map(appointment => (
+              <SC.Appointment key={appointment.id}>
+                <span>
+                  <FiClock />
+                  {appointment.hour}
+                </span>
 
-              <div>
-                <img
-                  src="https://avatars0.githubusercontent.com/u/42596775?s=460&u=8ddc06cf5793a75d7e7ad462ddfed52b8ef4d503&v=4"
-                  alt="Ivan Seibel"
-                />
+                <div>
+                  <img
+                    src={appointment.user.avatar_url}
+                    alt={appointment.user.name}
+                  />
 
-                <strong>Ivan Seibel</strong>
-              </div>
-            </SC.Appointment>
+                  <strong>{appointment.user.name}</strong>
+                </div>
+              </SC.Appointment>
+            ))}
           </SC.Section>
         </SC.Schedule>
         <SC.Calendar>
