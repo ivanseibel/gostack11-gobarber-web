@@ -17,7 +17,9 @@ import { useAuth } from '../../hooks/auth';
 interface ProfileFormData {
   name: string;
   email: string;
+  old_password: string;
   password: string;
+  password_confirmation: string;
 }
 
 const Profile: React.FC = () => {
@@ -42,23 +44,49 @@ const Profile: React.FC = () => {
           email: Yup.string()
             .required('Email is required')
             .email('Must be a valid email'),
-          password: Yup.string().min(6, 'Min 6 characters'),
+          old_password: Yup.string(),
+          password: Yup.string().when('old_password', {
+            is: val => !!val.length,
+            then: Yup.string()
+              .min(6, 'Min 6 characters')
+              .required('Password is required'),
+            otherwise: Yup.string(),
+          }),
+          password_confirmation: Yup.string().oneOf(
+            [Yup.ref('password'), undefined],
+            'Confirmation must match',
+          ),
         });
+
         await schema.validate(data, {
           abortEarly: false,
         });
 
-        await api.post('users', {
-          name: data.name,
-          email: data.email,
-          password: data.password,
+        const {
+          name,
+          email,
+          old_password,
+          password,
+          password_confirmation,
+        } = data;
+
+        const validatedData = {
+          name,
+          email,
+          ...(old_password
+            ? { old_password, password, password_confirmation }
+            : null),
+        };
+
+        await api.put('profile', validatedData).then(response => {
+          updateUser(response.data);
         });
 
         history.push('/');
 
         addToast({
           title: 'Well done',
-          description: 'You are registered on GoBarber and ready to logon.',
+          description: 'Your data was updated.',
           type: 'success',
         });
       } catch (err) {
@@ -70,11 +98,11 @@ const Profile: React.FC = () => {
         addToast({
           type: 'error',
           title: 'Oh-oh.. there is something wrong',
-          description: 'Please, verify your data and try again.',
+          description: `Please, verify your data and try again.${err.message}`,
         });
       }
     },
-    [addToast, history],
+    [addToast, history, updateUser],
   );
 
   const handleAvatarChange = useCallback(
