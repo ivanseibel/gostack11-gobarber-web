@@ -11,8 +11,7 @@ jest.mock('react-router-dom', () => {
 
 describe('SignIn page', () => {
   it('should be able to sign in', () => {
-    const result = render(<SignIn />);
-    const { debug } = result;
+    const { debug } = render(<SignIn />);
     debug();
   });
 });
